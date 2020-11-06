@@ -1,16 +1,19 @@
 {
-  "name": "my-webpack-project",
+  "name": "sg-3d-previewer",
   "version": "1.0.0",
-  "description": "My webpack project",
+  "description": "SG 3D Previewer",
   "main": "index.js",
   "scripts": {
     "start": "node ./serve/bin/www",
     "dev": "webpack --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "Shotgun",
+    "Web Application"
+  ],
+  "author": "Takanori Kishikawa",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
