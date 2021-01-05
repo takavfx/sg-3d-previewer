@@ -111,7 +111,7 @@ function preview (token, versions=[], envmap=0) {
 
     // Load Mdoel
     let model, animations
-    loadGLTF(versionsList[0])
+    loadModel(versionsList[0])
 
 
     function addGui () {
@@ -122,7 +122,7 @@ function preview (token, versions=[], envmap=0) {
             if (model) {
                 scene.remove(model)
             }
-            loadGLTF(params.Version)
+            loadModel(params.Version)
         })
         sgParamsFolder.open()
 
@@ -205,7 +205,7 @@ function preview (token, versions=[], envmap=0) {
     }
 
 
-    function loadGLTF (versionStr) {
+    function loadModel (versionStr) {
     
         const roughnessMipmapper = new RoughnessMipmapper(renderer)
         
