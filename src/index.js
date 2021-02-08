@@ -277,6 +277,7 @@ function preview (token, versions=[], envmap=0) {
                 )
             }
             else if (ext === 'fbx') {
+                console.log('This is fbx file')
 
                 const loader = new FBXLoader()
 
@@ -287,23 +288,24 @@ function preview (token, versions=[], envmap=0) {
                         model = fbx
                         roughnessMipmapper.dispose()
 
-                        let stdMat = new THREE.MeshStandardMaterial()
-                        stdMat.skinning = true
-
                         model.traverse( function(child) {
                             if ( child.isMesh ) {
                                 child.castShadow = true
                                 child.receiveShadow = true
+                                let stdMat = new THREE.MeshStandardMaterial({
+                                    color: new THREE.Color(child.material.color)
+                                })
+                                stdMat.skinning = true
                                 child.material = stdMat
                             }
                         })
                         
                         scene.add( model )
                         
-                        console.log(model.animations.length)
+                        // console.log(model.animations.length)
                         mixer = new THREE.AnimationMixer( model )
                         for (let i = 0; i < model.animations.length; i++) {
-                            console.log(i)
+                            // console.log(i)
                             let animation = model.animations[i]
                             
                             let action = mixer.clipAction( animation )
