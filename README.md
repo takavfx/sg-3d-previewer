@@ -75,10 +75,10 @@ Then, accessing on a browser at http://localhost:9080 .
 4. Insert URL with query:
    * Ex: http://localhost:9080/?assetId={id}&envmap=0
 
-| Query Name   | Value | Required/Optional |
-|:-------------|:------|:------------------|
-| assetId (Int)| {id}  | Required          |
-| envmap (Int) | 0,1,2 | Optional          |
+| Query Name   | Value | Required/Optional | Description                                          |
+|:-------------|:------|:------------------|:-----------------------------------------------------|
+| assetId (Int)| {id}  | Required          | Asset ID to recognize which asset will be displayed. |
+| envmap (Int) | 0,1,2 | Optional          | Set default Environment map from defined set.        |
 
 
 ### Use the ervice
