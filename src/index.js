@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { RoughnessMipmapper } from 'three/examples/jsm/utils/RoughnessMipmapper'
 
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module'
@@ -12,6 +13,7 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 
 import { baseUrl, credentialParams } from './env'
 import './style/index.scss'
+import { EquirectangularReflectionMapping } from 'three'
 
 const parse = querystring.parse
 
@@ -89,6 +91,8 @@ function preview (token, versions=[], envmap=0) {
     // Create Heloper
     let axis = new THREE.AxesHelper()
     let grid = new THREE.GridHelper()
+    grid.material.opacity = 0.2
+    grid.material.transparent = true
     if (params.Axis) {scene.add(axis)}
     if (params.Grid) {scene.add(grid)}
     
@@ -183,7 +187,7 @@ function preview (token, versions=[], envmap=0) {
         
                     scene.background = new THREE.Color('#696969')
                     scene.environment = envMap
-        
+
                     texture.dispose()
                     pmremGenerator.dispose()
                 }
@@ -193,10 +197,10 @@ function preview (token, versions=[], envmap=0) {
                 envMaps[envMapName],
                 function (texture) {
                     let envMap = pmremGenerator.fromEquirectangular(texture).texture
-        
+                    
                     scene.background = envMap
                     scene.environment = envMap
-        
+                    
                     texture.dispose()
                     pmremGenerator.dispose()
                 }
@@ -209,10 +213,6 @@ function preview (token, versions=[], envmap=0) {
     
         const roughnessMipmapper = new RoughnessMipmapper(renderer)
         
-        // Create loader
-        const dracoLoader = new DRACOLoader()
-        const loader = new GLTFLoader()
-        loader.setDRACOLoader(dracoLoader)
         let versionId = 0
         for (let i=0;i<versions.length;i++) {
             if (versionStr==versions[i]['name']) {
@@ -220,6 +220,7 @@ function preview (token, versions=[], envmap=0) {
                 break
             }
         }
+        
         fetch(baseUrl+`/api/v1/entity/versions/${versionId}`, {
             method: 'get',
             headers: {
@@ -232,35 +233,96 @@ function preview (token, versions=[], envmap=0) {
         .then((version_detail_data) => {
             // console.log(version_detail_data['data'])
             // console.log(version_detail_data['data']['attributes']['sg_preview_geometry']['url'])
-            loader.load(
-                version_detail_data['data']['attributes']['sg_preview_geometry']['url'],
-                function (gltf) {
-                    console.log(gltf)
-                    model = gltf.scene
-                    animations = gltf.animations
-                    // console.log(model)
-                    // console.log(gltf.animations)
+            console.log('Got version data ===')
+            console.log(version_detail_data)
+            let fileUrl = version_detail_data['data']['attributes']['sg_preview_geometry']['url']
+            // console.log(fileUrl)
+            let ext = fileUrl.substring(fileUrl.lastIndexOf('.') + 1).split('%')[0]
+            console.log(ext)
+            if (ext === 'gltf') {
+                console.log('This is gltf file')
+                // Create loader
+                const dracoLoader = new DRACOLoader()
+                const loader = new GLTFLoader()
+                loader.setDRACOLoader(dracoLoader)
 
-                    model.name = 'loaded model'
-    
-                    roughnessMipmapper.dispose()
-                    
-                    scene.add(model)
-                    // console.log(gltf.animations[0])
-                    if (gltf.animations[0]) {
-                        mixer = new THREE.AnimationMixer(model)
-                        mixer.clipAction(gltf.animations[0]).play()
-                        animate()
+                loader.load(
+                    fileUrl,
+                    function (gltf) {
+                        console.log(gltf)
+                        model = gltf.scene
+                        animations = gltf.animations
+                        // console.log(model)
+                        // console.log(gltf.animations)
+                        
+                        model.name = 'loaded model'
+                        
+                        roughnessMipmapper.dispose()
+                        
+                        scene.add(model)
+                        // console.log(gltf.animations[0])
+                        if (gltf.animations[0]) {
+                            mixer = new THREE.AnimationMixer(model)
+                            mixer.clipAction(gltf.animations[0]).play()
+                            animate()
+                        }
+                    },
+                    function (xhr) {
+                        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+                    },
+                    function (err) {
+                        console.error('Loading GLTF scene is failed.')
+                        console.error(err)
                     }
-                },
-                function (xhr) {
-                    console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-                },
-                function (err) {
-                    console.error('Loading GLTF scene is failed.')
-                    console.error(err)
-                }
-            )
+                )
+            }
+            else if (ext === 'fbx') {
+
+                const loader = new FBXLoader()
+
+                loader.load(
+                    fileUrl,
+                    function ( fbx ) {
+                        console.log( fbx )
+                        model = fbx
+                        roughnessMipmapper.dispose()
+
+                        let stdMat = new THREE.MeshStandardMaterial()
+                        stdMat.skinning = true
+
+                        model.traverse( function(child) {
+                            if ( child.isMesh ) {
+                                child.castShadow = true
+                                child.receiveShadow = true
+                                child.material = stdMat
+                            }
+                        })
+                        
+                        scene.add( model )
+                        
+                        console.log(model.animations.length)
+                        mixer = new THREE.AnimationMixer( model )
+                        for (let i = 0; i < model.animations.length; i++) {
+                            console.log(i)
+                            let animation = model.animations[i]
+                            
+                            let action = mixer.clipAction( animation )
+                            
+                            action.play()
+                            animate()
+                        }
+                        
+                    },
+                    function (xhr) {
+                        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+                    },
+                    function (err) {
+                        console.error('Loading FBX scene is failed.')
+                        console.error(err)
+                    }
+                )
+            }
+
         })
         .catch((err)=> {
             console.error('Accessing to data resource is failed.')
