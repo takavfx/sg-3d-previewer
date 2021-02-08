@@ -345,6 +345,9 @@ function preview (token, versions=[], envmap=0) {
                 clock.start()
             }
         }
+        if (keyCode == 'KeyG') {
+            camera.position.set(0, 3, 5)
+        }
     }
 
 
