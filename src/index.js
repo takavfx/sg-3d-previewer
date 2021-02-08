@@ -13,6 +13,7 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 
 import { baseUrl, credentialParams } from './env'
 import './style/index.scss'
+import { EquirectangularReflectionMapping } from 'three'
 
 const parse = querystring.parse
 
@@ -186,7 +187,7 @@ function preview (token, versions=[], envmap=0) {
         
                     scene.background = new THREE.Color('#696969')
                     scene.environment = envMap
-        
+
                     texture.dispose()
                     pmremGenerator.dispose()
                 }
@@ -283,29 +284,34 @@ function preview (token, versions=[], envmap=0) {
                     fileUrl,
                     function ( fbx ) {
                         console.log( fbx )
-                        
-                        mixer = new THREE.AnimationMixer( fbx )
-                        
-                        const action = mixer.clipAction( fbx.animations[1] )
-                        action.play()
-
                         model = fbx
                         roughnessMipmapper.dispose()
+
+                        let stdMat = new THREE.MeshStandardMaterial()
+                        stdMat.skinning = true
+
                         model.traverse( function(child) {
                             if ( child.isMesh ) {
                                 child.castShadow = true
                                 child.receiveShadow = true
+                                child.material = stdMat
                             }
                         })
+                        
                         scene.add( model )
-
-                        let hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2.0)
-                        hemiLight.position.set(0, 1, 0)
-                        scene.add(hemiLight)
-                
-                        // let dirLight = new THREE.DirectionalLight(0xffffff, 1.0)
-                        // dirLight.position.set(0, 1, 0)
-                        // scene.add(dirLight)
+                        
+                        console.log(model.animations.length)
+                        mixer = new THREE.AnimationMixer( model )
+                        for (let i = 0; i < model.animations.length; i++) {
+                            console.log(i)
+                            let animation = model.animations[i]
+                            
+                            let action = mixer.clipAction( animation )
+                            
+                            action.play()
+                            animate()
+                        }
+                        
                     },
                     function (xhr) {
                         console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
