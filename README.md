@@ -83,7 +83,7 @@ Then, accessing on a browser at http://localhost:9080 .
 
 ### Use the ervice
 
-1. Create Version entity item with a preview geoemtry file [.glt, .glb].
+1. Create Version entity item with a preview geoemtry file [.glt, .glb, .fbx].
 3. Open the tab previously created.
 
 
@@ -108,6 +108,10 @@ npm start
 
 ### GLTF File
 
-* Currently Embded(textures) or Binary type of GLTF file is only supported.
+* Currently Embded(textures) or Binary type of GLTF file is only supported, for GLTF file format.
   * Ex: https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/AlphaBlendModeTest/glTF-Embedded
   * Ex: https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/AlphaBlendModeTest/glTF-Binary
+
+### FBX File
+
+* Loading lights also works as FBX scene loading.
