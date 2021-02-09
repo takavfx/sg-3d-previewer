@@ -260,10 +260,15 @@ function preview (token, versions=[], envmap=0) {
                         roughnessMipmapper.dispose()
                         
                         scene.add(model)
-                        // console.log(gltf.animations[0])
-                        if (gltf.animations[0]) {
-                            mixer = new THREE.AnimationMixer(model)
-                            mixer.clipAction(gltf.animations[0]).play()
+
+                        mixer = new THREE.AnimationMixer( model )
+                        for (let i = 0; i < gltf.animations.length; i++) {
+                            // console.log(i)
+                            let animation = gltf.animations[i]
+                            
+                            let action = mixer.clipAction( animation )
+                            
+                            action.play()
                             animate()
                         }
                     },
