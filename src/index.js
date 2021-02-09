@@ -114,7 +114,7 @@ function preview (token, versions=[], envmap=0) {
     loadEnvMap(Object.keys(envMaps)[envmap])
 
     // Load Mdoel
-    let model, animations
+    let fScene, model, animations
     loadModel(versionsList[0])
 
 
@@ -123,8 +123,8 @@ function preview (token, versions=[], envmap=0) {
         // Shotgun
         let sgParamsFolder = gui.addFolder('Shotgun')
         sgParamsFolder.add(params, 'Version', versionsList).onChange(function () {
-            if (model) {
-                scene.remove(model)
+            if (fScene) {
+                scene.remove(fScene)
             }
             loadModel(params.Version)
         })
@@ -140,8 +140,11 @@ function preview (token, versions=[], envmap=0) {
         // Play
         let playParamsFolder = gui.addFolder('Play')
         playParamsFolder.add(params, 'TimeScale', -1, 2).onChange(function () {
-            let action = mixer.clipAction(animations[0])
-            action.timeScale = params.TimeScale
+            for (let i=0;i<animations.length;i++) {
+                let animation = animations[i]
+                let action = mixer.clipAction(animation)
+                action.timeScale = params.TimeScale
+            }
         })
         playParamsFolder.open()
 
@@ -250,21 +253,22 @@ function preview (token, versions=[], envmap=0) {
                     fileUrl,
                     function (gltf) {
                         console.log(gltf)
-                        model = gltf.scene
+                        model = gltf
+                        fScene = gltf.scene
                         animations = gltf.animations
-                        // console.log(model)
-                        // console.log(gltf.animations)
+                        // console.log(fScene)
+                        // console.log(animations)
                         
-                        model.name = 'loaded model'
+                        fScene.name = 'loaded fScene'
                         
                         roughnessMipmapper.dispose()
                         
-                        scene.add(model)
+                        scene.add(fScene)
 
-                        mixer = new THREE.AnimationMixer( model )
-                        for (let i = 0; i < gltf.animations.length; i++) {
+                        mixer = new THREE.AnimationMixer( fScene )
+                        for (let i = 0; i < animations.length; i++) {
                             // console.log(i)
-                            let animation = gltf.animations[i]
+                            let animation = animations[i]
                             
                             let action = mixer.clipAction( animation )
                             
@@ -290,10 +294,11 @@ function preview (token, versions=[], envmap=0) {
                     fileUrl,
                     function ( fbx ) {
                         console.log( fbx )
-                        model = fbx
+                        fScene = model = fbx
+                        animations = model.animations
                         roughnessMipmapper.dispose()
 
-                        model.traverse( function(child) {
+                        fScene.traverse( function(child) {
                             if ( child.isMesh ) {
                                 child.castShadow = true
                                 child.receiveShadow = true
@@ -305,13 +310,13 @@ function preview (token, versions=[], envmap=0) {
                             }
                         })
                         
-                        scene.add( model )
+                        scene.add( fScene )
                         
-                        // console.log(model.animations.length)
-                        mixer = new THREE.AnimationMixer( model )
-                        for (let i = 0; i < model.animations.length; i++) {
+                        // console.log(fScene.animations.length)
+                        mixer = new THREE.AnimationMixer( fScene )
+                        for (let i = 0; i < animations.length; i++) {
                             // console.log(i)
-                            let animation = model.animations[i]
+                            let animation = animations[i]
                             
                             let action = mixer.clipAction( animation )
                             
