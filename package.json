@@ -1,6 +1,6 @@
 {
   "name": "sg-3d-previewer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "SG 3D Previewer",
   "main": "index.js",
   "scripts": {
