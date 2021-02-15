@@ -54,6 +54,7 @@ module.exports = credentialParams
 ### Build
 
 ```shell
+npm install
 npm run build
 ```
 
