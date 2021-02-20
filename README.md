@@ -102,7 +102,9 @@ To test server with routing:
 
 ```shell
 cd serve
-npm start
+npm install
+
+npm start (This is also available at root level)
 ```
 
 ## Spec
