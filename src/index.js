@@ -31,6 +31,7 @@ const envMaps = {
 
 function preview (token, versions=[], envmap=0) {
     const canvas = document.querySelector('#canvas')
+    const info = document.querySelector('#info')
     
     // Prepare for animation
     let mixer, stats
@@ -227,7 +228,7 @@ function preview (token, versions=[], envmap=0) {
 
 
     function loadModel (versionStr) {
-    
+        info.innerHTML = ""
         const roughnessMipmapper = new RoughnessMipmapper(renderer)
         
         let versionId = 0
@@ -293,7 +294,7 @@ function preview (token, versions=[], envmap=0) {
                         fitCameraToObject(camera, model, 0.0000000000000005, controls)
                     },
                     function (xhr) {
-                        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+                        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' )
                     },
                     function (err) {
                         console.error('Loading GLTF scene is failed.')
@@ -343,7 +344,7 @@ function preview (token, versions=[], envmap=0) {
                         fitCameraToObject(camera, model, 0.0000000000000005, controls)
                     },
                     function (xhr) {
-                        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+                        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' )
                     },
                     function (err) {
                         console.error('Loading FBX scene is failed.')
@@ -351,7 +352,9 @@ function preview (token, versions=[], envmap=0) {
                     }
                 )
             }
-
+            else {
+                info.innerHTML = "Shotgun 3D Previewer is currently support .gltf, .glb, .fbx."
+            }
         })
         .catch((err)=> {
             console.error('Accessing to data resource is failed.')
