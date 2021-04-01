@@ -55,6 +55,8 @@ function preview (token, versions=[], envmap=0) {
         EnvMap: Object.keys(envMaps)[envmap],
         TimeScale: 1,
         Exposure: 1,
+        Intensity: 2.5,
+        Color: 0xffffff,
         Axis: toBoolean(AxisState),
         Grid: toBoolean(GridState),
         Stats: toBoolean(StatsState),
@@ -113,6 +115,10 @@ function preview (token, versions=[], envmap=0) {
     let gui = new GUI()
     addGui()
 
+    // Add default light
+    const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x080820, 2.5);
+    scene.add(hemiLight)
+
     // Load Environment
     // console.log('EnvMaps', envmap, Object.keys(envMaps)[envmap])
     loadEnvMap(Object.keys(envMaps)[envmap])
@@ -138,13 +144,19 @@ function preview (token, versions=[], envmap=0) {
         envParamsFolder.add(params, 'EnvMap', Object.keys(envMaps)).onChange(function () {
             loadEnvMap(params.EnvMap)
         })
+        envParamsFolder.add(params, 'Exposure', 0, 2).onChange(function () {
+            renderer.toneMappingExposure = params.Exposure
+        })
         envParamsFolder.open()
 
         // Light
         let lightParamsFolder = gui.addFolder('Light')
-        lightParamsFolder.add(params, 'Exposure', 0, 2).onChange(function () {
-            renderer.toneMappingExposure = params.Exposure
+        lightParamsFolder.addColor(params, 'Color').onChange(function () {
+            hemiLight.color = new THREE.Color( params.Color )
         })
+        lightParamsFolder.add(params, 'Intensity', 0, 5).onChange(function () {
+            hemiLight.intensity = params.Intensity
+        }).listen()
         lightParamsFolder.open()
 
         // Play
@@ -193,18 +205,9 @@ function preview (token, versions=[], envmap=0) {
 
     function loadEnvMap (envMapName) {
         if (envMapName==='default') {
-            rgbeLoader.load(
-                envMaps[Object.keys(envMaps)[1]],
-                function (texture) {
-                    let envMap = pmremGenerator.fromEquirectangular(texture).texture
-        
-                    scene.background = new THREE.Color('#696969')
-                    scene.environment = envMap
-
-                    texture.dispose()
-                    pmremGenerator.dispose()
-                }
-            )
+            scene.background = new THREE.Color('#696969')
+            scene.environment = null
+            hemiLight.intensity = params.Intensity = ( hemiLight.intensity <= 1 ) ? 2.5 : params.Intensity
         } else {
             rgbeLoader.load(
                 envMaps[envMapName],
@@ -218,6 +221,7 @@ function preview (token, versions=[], envmap=0) {
                     pmremGenerator.dispose()
                 }
             )
+            params.Intensity = hemiLight.intensity = 0
         }
     }
 
