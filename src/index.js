@@ -120,7 +120,6 @@ function preview (token, versions=[], envmap=0) {
     let fScene, model, animations
     loadModel(versionsList[0])
 
-
     function addGui () {
 
         // Shotgun
@@ -278,6 +277,8 @@ function preview (token, versions=[], envmap=0) {
                             action.play()
                             animate()
                         }
+
+                        fitCameraToObject(camera, model, 0.0000000000000005, controls)
                     },
                     function (xhr) {
                         console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -327,6 +328,7 @@ function preview (token, versions=[], envmap=0) {
                             animate()
                         }
                         
+                        fitCameraToObject(camera, model, 0.0000000000000005, controls)
                     },
                     function (xhr) {
                         console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -346,6 +348,62 @@ function preview (token, versions=[], envmap=0) {
         })
     }
 
+    function fitCameraToObject (camera, model, offset, controls) {
+        console.log("fit camera to object ===")
+
+        let object = null
+        if (model['children']) {
+            for (let i = 0; i < model['children'].length; i ++) {
+                let child = model['children'][i]
+                if (child['type'] != 'Bone') {
+                    object = child
+                    break
+                }
+            }
+        } else if (model.scene) {
+            object = model.scene['children'][0]
+        }
+        console.log(object)
+        if ( !object ) {
+            console.log('Fit object is not found.')
+            return
+        }
+
+        offset = offset || 1.25
+        
+        const boundingBox = new THREE.Box3()
+        boundingBox.setFromObject(object)
+
+        let center = new THREE.Vector3()
+        let size = new THREE.Vector3()
+
+        boundingBox.getCenter(center)
+        boundingBox.getSize(size)
+        console.log(center)
+        console.log(size)
+
+        const maxDim = Math.max( size.x, size.y, size.z )
+        const fov = camera.fov * ( Math.PI / 180 )
+        let cameraZ = Math.abs( maxDim / 4 * Math.tan( fov * 2 ))
+        cameraZ *= offset
+        console.log(cameraZ)
+        camera.position.z = cameraZ
+        
+        const minZ = boundingBox.min.z
+        const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ
+        camera.farEdge = cameraToFarEdge * 3
+        camera.updateProjectionMatrix()
+
+        if ( controls ) {
+            controls.target = center
+            controls.maxDistance = cameraToFarEdge * 3
+
+            controls.saveState()
+        } else {
+            camera.lookAt(center)
+        }
+    }
+
 
     function onDocumentKeyDown (event) {
         let keyCode = event.code
@@ -360,6 +418,9 @@ function preview (token, versions=[], envmap=0) {
         }
         if (keyCode == 'KeyG') {
             camera.position.set(0, 3, 5)
+        }
+        if (keyCode == 'KeyF') {
+            fitCameraToObject(camera, model, 0.0000000000000005, controls)
         }
     }
 
