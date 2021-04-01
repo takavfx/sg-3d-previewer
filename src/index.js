@@ -54,6 +54,7 @@ function preview (token, versions=[], envmap=0) {
         Version: versionsList[0],
         EnvMap: Object.keys(envMaps)[envmap],
         TimeScale: 1,
+        Exposure: 1,
         Axis: toBoolean(AxisState),
         Grid: toBoolean(GridState),
         Stats: toBoolean(StatsState),
@@ -138,6 +139,13 @@ function preview (token, versions=[], envmap=0) {
             loadEnvMap(params.EnvMap)
         })
         envParamsFolder.open()
+
+        // Light
+        let lightParamsFolder = gui.addFolder('Light')
+        lightParamsFolder.add(params, 'Exposure', 0, 2).onChange(function () {
+            renderer.toneMappingExposure = params.Exposure
+        })
+        lightParamsFolder.open()
 
         // Play
         let playParamsFolder = gui.addFolder('Play')
@@ -348,62 +356,6 @@ function preview (token, versions=[], envmap=0) {
         })
     }
 
-    function fitCameraToObject (camera, model, offset, controls) {
-        console.log("fit camera to object ===")
-
-        let object = null
-        if (model['children']) {
-            for (let i = 0; i < model['children'].length; i ++) {
-                let child = model['children'][i]
-                if (child['type'] != 'Bone') {
-                    object = child
-                    break
-                }
-            }
-        } else if (model.scene) {
-            object = model.scene['children'][0]
-        }
-        console.log(object)
-        if ( !object ) {
-            console.log('Fit object is not found.')
-            return
-        }
-
-        offset = offset || 1.25
-        
-        const boundingBox = new THREE.Box3()
-        boundingBox.setFromObject(object)
-
-        let center = new THREE.Vector3()
-        let size = new THREE.Vector3()
-
-        boundingBox.getCenter(center)
-        boundingBox.getSize(size)
-        console.log(center)
-        console.log(size)
-
-        const maxDim = Math.max( size.x, size.y, size.z )
-        const fov = camera.fov * ( Math.PI / 180 )
-        let cameraZ = Math.abs( maxDim / 4 * Math.tan( fov * 2 ))
-        cameraZ *= offset
-        console.log(cameraZ)
-        camera.position.z = cameraZ
-        
-        const minZ = boundingBox.min.z
-        const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ
-        camera.farEdge = cameraToFarEdge * 3
-        camera.updateProjectionMatrix()
-
-        if ( controls ) {
-            controls.target = center
-            controls.maxDistance = cameraToFarEdge * 3
-
-            controls.saveState()
-        } else {
-            camera.lookAt(center)
-        }
-    }
-
 
     function onDocumentKeyDown (event) {
         let keyCode = event.code
@@ -476,6 +428,62 @@ function toBoolean (data='') {
     return data === 'true'
 }
 
+
+function fitCameraToObject (camera, model, offset, controls) {
+    console.log("fit camera to object ===")
+
+    let object = null
+    if (model['children']) {
+        for (let i = 0; i < model['children'].length; i ++) {
+            let child = model['children'][i]
+            if (child['type'] != 'Bone') {
+                object = child
+                break
+            }
+        }
+    } else if (model.scene) {
+        object = model.scene['children'][0]
+    }
+    console.log(object)
+    if ( !object ) {
+        console.log('Fit object is not found.')
+        return
+    }
+
+    offset = offset || 1.25
+    
+    const boundingBox = new THREE.Box3()
+    boundingBox.setFromObject(object)
+
+    let center = new THREE.Vector3()
+    let size = new THREE.Vector3()
+
+    boundingBox.getCenter(center)
+    boundingBox.getSize(size)
+    console.log(center)
+    console.log(size)
+
+    const maxDim = Math.max( size.x, size.y, size.z )
+    const fov = camera.fov * ( Math.PI / 180 )
+    let cameraZ = Math.abs( maxDim / 4 * Math.tan( fov * 2 ))
+    cameraZ *= offset
+    console.log(cameraZ)
+    camera.position.z = cameraZ
+    
+    const minZ = boundingBox.min.z
+    const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ
+    camera.farEdge = cameraToFarEdge * 3
+    camera.updateProjectionMatrix()
+
+    if ( controls ) {
+        controls.target = center
+        controls.maxDistance = cameraToFarEdge * 3
+
+        controls.saveState()
+    } else {
+        camera.lookAt(center)
+    }
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     let query = parse(location.search.split('?')[1])
