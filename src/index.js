@@ -17,6 +17,9 @@ import { EquirectangularReflectionMapping } from 'three'
 
 const parse = querystring.parse
 
+const extGltfArray = ["gltf", "glb"]
+const extFbxArray = ["fbx"]
+
 const envMaps = {
     default: '',
     pedestrian_overpass_1k: 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/equirectangular/pedestrian_overpass_1k.hdr',
@@ -242,7 +245,7 @@ function preview (token, versions=[], envmap=0) {
             // console.log(fileUrl)
             let ext = fileUrl.substring(fileUrl.lastIndexOf('.') + 1).split('%')[0]
             console.log(ext)
-            if (ext === 'gltf') {
+            if (extGltfArray.indexOf(ext) >= 0) {
                 console.log('This is gltf file')
                 // Create loader
                 const dracoLoader = new DRACOLoader()
@@ -285,7 +288,7 @@ function preview (token, versions=[], envmap=0) {
                     }
                 )
             }
-            else if (ext === 'fbx') {
+            else if (extFbxArray.indexOf(ext) >= 0) {
                 console.log('This is fbx file')
 
                 const loader = new FBXLoader()
@@ -405,7 +408,7 @@ function makeUrl (url, params) {
 
 
 function toBoolean (data='') {
-    console.log(typeof(data))
+    // console.log(typeof(data))
     if (typeof(data) === 'boolean') {
         return data
     }
@@ -417,6 +420,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let query = parse(location.search.split('?')[1])
     console.log(query)
     
+    console.log("Get credential token ===")
     fetch(makeUrl(baseUrl+'/api/v1/auth/access_token/?', credentialParams), {
         method: 'post',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -426,7 +430,8 @@ window.addEventListener('DOMContentLoaded', () => {
     )
     .then(
         (at_data) => {
-        // console.log(at_data)
+        console.log(at_data)
+        console.log("Get Asset info ===")
         fetch(baseUrl+`/api/v1/entity/assets/${query['assetId']}/relationships/sg_versions?field['']`, {
                 method: 'get',
                 headers: {
