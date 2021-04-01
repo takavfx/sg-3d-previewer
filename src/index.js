@@ -56,7 +56,7 @@ function preview (token, versions=[], envmap=0) {
         EnvMap: Object.keys(envMaps)[envmap],
         TimeScale: 1,
         Exposure: 1,
-        Intensity: 2.5,
+        Intensity: 3,
         Color: 0xffffff,
         Axis: toBoolean(AxisState),
         Grid: toBoolean(GridState),
@@ -208,7 +208,7 @@ function preview (token, versions=[], envmap=0) {
         if (envMapName==='default') {
             scene.background = new THREE.Color('#696969')
             scene.environment = null
-            hemiLight.intensity = params.Intensity = ( hemiLight.intensity <= 1 ) ? 2.5 : params.Intensity
+            hemiLight.intensity = params.Intensity = ( hemiLight.intensity <= 1 ) ? 3 : params.Intensity
         } else {
             rgbeLoader.load(
                 envMaps[envMapName],
@@ -360,6 +360,7 @@ function preview (token, versions=[], envmap=0) {
             console.error('Accessing to data resource is failed.')
             console.error(err)
             console.error('Please reload this page.')
+            info.innerHTML = 'Accessing to data resource is failed.<br/>Please reload this page.'
         })
     }
 
@@ -520,7 +521,7 @@ window.addEventListener('DOMContentLoaded', () => {
         .then((version_res) => version_res.json())
         .then((version_data) => {
             // console.log(version_data['data'])
-            preview(at_data, version_data['data'], query['envmap'])
+            preview(at_data, version_data['data'].reverse(), query['envmap'])
         })
     })
 })
