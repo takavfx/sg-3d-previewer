@@ -1,120 +1,36 @@
-# Shotgun 3D Previewer
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-![](docs/../doc/images/sg-3d-previewer.gif)
+## Getting Started
 
-## Build Project
+First, run the development server:
 
-### Set Base URL
-
-In `src/env.js`, there's declaration for Shotgun URL.
-
-```javascript
-const baseUrl = '<shotgun_url>'
-```
-
-
-### Credential Settings
-
-To access to Shotgun, you have to set credential info to `src/env.js`.
-
-Basic access uses Shotgun script/api-key info with Grant Type: `client_credentials`.
-
-However there's other Grant Types to access with REST API. The document is [here](https://developer.shotgunsoftware.com/rest-api/#authentication).
-
-
-#### Grant Type: `client_credentials`
-
-```javascript
-'use strict'
-
-const credentialParams = {
-    'client_id': '<script_name>',
-    'client_secret': '<api_key>',
-    'grant_type': 'client_credentials'
-}
-
-module.exports = credentialParams
-```
-
-#### Grant Type: `password`
-
-```javascript
-'use strict'
-
-const credentialParams = {
-    'username': '<your_username>',
-    'password': '<your_password>',
-    'grant_type': 'password'
-}
-
-module.exports = credentialParams
-```
-
-
-### Build
-
-```shell
-npm install
-npm run build
-```
-
-
-### Deploy with Docker
-
-```shell
-docker build -t sg-3d-previewer .
-docker run -p 9080:9080 -d sg-3d-previewer
-```
-
-Then, accessing on a browser at http://localhost:9080 .
-
-### Prepare to use on Shotgun
-
-1. Create `sg_preview_geometry` fileld on Version entity. 
-2. Open a design page at Asset entity item page.
-3. Add new URL type tab.
-4. Insert URL with query:
-   * Ex: http://localhost:9080/?assetId={id}&envmap=0
-
-| Query Name   | Value | Required/Optional | Description                                          |
-|:-------------|:------|:------------------|:-----------------------------------------------------|
-| assetId (Int)| {id}  | Required          | Asset ID to recognize which asset will be displayed. |
-| envmap (Int) | 0,1,2 | Optional          | Set default Environment map from defined set.        |
-
-
-### Use the ervice
-
-1. Create Version entity item with a preview geoemtry file [.glt, .glb, .fbx].
-3. Open the tab previously created.
-
-
-## Development
-
-### Build as dev mode
-
-```shell
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### Run on Express.js Server
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-To test server with routing:
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```shell
-cd serve
-npm install
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-npm start (This is also available at root level)
-```
+## Learn More
 
-## Spec
+To learn more about Next.js, take a look at the following resources:
 
-### GLTF File
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-* Currently Embded(textures) or Binary type of GLTF file is only supported, for GLTF file format.
-  * Ex: https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/AlphaBlendModeTest/glTF-Embedded
-  * Ex: https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/AlphaBlendModeTest/glTF-Binary
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-### FBX File
+## Deploy on Vercel
 
-* Loading lights also works as FBX scene loading.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
