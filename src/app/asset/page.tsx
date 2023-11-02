@@ -2,6 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
+import { FaGithub } from "react-icons/fa";
 
 function Model() {
   const { scene } = useGLTF(
@@ -13,6 +14,12 @@ function Model() {
 export default function Asset() {
   return (
     <div className="aspect-auto h-screen">
+      <a
+        href="https://github.com/takavfx/sg-3d-previewer"
+        className="absolute z-10 bottom-0"
+      >
+        <FaGithub size={24} className="m-2" />
+      </a>
       <Canvas>
         <OrbitControls enableDamping enablePan enableRotate enableZoom />
         <Environment
